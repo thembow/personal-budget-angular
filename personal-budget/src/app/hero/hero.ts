@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
 
 @Component({
   standalone: true,
   selector: 'pb-hero',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './hero.html',
   styleUrl: './hero.scss'
 })

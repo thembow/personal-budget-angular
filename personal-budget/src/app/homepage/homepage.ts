@@ -2,11 +2,13 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Article } from '../article/article';
 import { HttpClient } from '@angular/common/http';
 import { Chart } from 'chart.js/auto';
+import { Breadcrumbs } from '../breadcrumbs/breadcrumbs';
+import { D3chart } from '../d3chart/d3chart';
 
 @Component({
   standalone: true,
   selector: 'pb-homepage',
-  imports: [Article],
+  imports: [Article, Breadcrumbs, D3chart],
   templateUrl: './homepage.html',
   styleUrl: './homepage.scss'
 })
