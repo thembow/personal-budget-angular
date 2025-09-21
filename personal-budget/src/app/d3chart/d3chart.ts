@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import * as d3 from 'd3';
+import { DataService } from '../data'; // adjust path to where your service is
 
 @Component({
   selector: 'pb-d3chart',
   standalone: true,
   imports: [],
   templateUrl: './d3chart.html',
-  styleUrl: './d3chart.scss'
+  styleUrls: ['./d3chart.scss']
 })
 export class D3chart implements OnInit {
   private svg: any;
@@ -14,19 +15,18 @@ export class D3chart implements OnInit {
   private height = 450;
   private radius = Math.min(this.width, this.height) / 2;
 
-  private data = [
-    { label: 'Lorem', value: 10 },
-    { label: 'Ipsum', value: 20 },
-    { label: 'Dolor', value: 30 },
-    { label: 'Sit', value: 15 },
-    { label: 'Amet', value: 25 }
-  ];
-
   private color = d3.scaleOrdinal(d3.schemeCategory10);
+
+  constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
     this.createSvg();
-    this.drawChart(this.data);
+
+    // call your service (adjust method name)
+    this.dataService.getBudgetData().subscribe(data => {
+  // data is already ChartItem[]
+  this.drawChart(data);
+  });
   }
 
   private createSvg(): void {
@@ -43,21 +43,23 @@ export class D3chart implements OnInit {
     const arc = d3.arc<any>().innerRadius(0).outerRadius(this.radius * 0.8);
     const outerArc = d3.arc<any>().innerRadius(this.radius * 0.9).outerRadius(this.radius * 0.9);
 
-    const slices = this.svg.selectAll('path.slice')
-      .data(pie(data));
+    // clear before redrawing
+    this.svg.selectAll('*').remove();
+    this.svg.attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
 
-    // Add slices
-    slices.enter()
+    const pieData = pie(data);
+
+    this.svg.selectAll('path.slice')
+      .data(pieData)
+      .enter()
       .append('path')
       .attr('class', 'slice')
       .attr('d', arc)
       .attr('fill', (d, i) => this.color(i));
 
-    // Add labels
-    const text = this.svg.selectAll('text')
-      .data(pie(data));
-
-    text.enter()
+    this.svg.selectAll('text')
+      .data(pieData)
+      .enter()
       .append('text')
       .text(d => d.data.label)
       .attr('transform', d => {
@@ -67,11 +69,9 @@ export class D3chart implements OnInit {
       })
       .style('text-anchor', d => this.midAngle(d) < Math.PI ? 'start' : 'end');
 
-    // Add polylines
-    const polyline = this.svg.selectAll('polyline')
-      .data(pie(data));
-
-    polyline.enter()
+    this.svg.selectAll('polyline')
+      .data(pieData)
+      .enter()
       .append('polyline')
       .attr('points', d => {
         const pos = outerArc.centroid(d);
